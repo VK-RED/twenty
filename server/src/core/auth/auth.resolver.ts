@@ -45,8 +45,9 @@ export class AuthResolver {
   async checkUserExists(
     @Args() checkUserExistsInput: CheckUserExistsInput,
   ): Promise<UserExists> {
+    
     const { exists } = await this.authService.checkUserExists(
-      checkUserExistsInput.email,
+      checkUserExistsInput.email.toLowerCase(),
     );
     return { exists };
   }
@@ -73,7 +74,9 @@ export class AuthResolver {
 
   @Mutation(() => LoginToken)
   async challenge(@Args() challengeInput: ChallengeInput): Promise<LoginToken> {
-    const user = await this.authService.challenge(challengeInput);
+
+    const newChallengeInput : ChallengeInput = {...challengeInput, email : challengeInput.email.toLowerCase()};
+    const user = await this.authService.challenge(newChallengeInput);
     const loginToken = await this.tokenService.generateLoginToken(user.email);
 
     return { loginToken };
@@ -81,7 +84,9 @@ export class AuthResolver {
 
   @Mutation(() => LoginToken)
   async signUp(@Args() signUpInput: SignUpInput): Promise<LoginToken> {
-    const user = await this.authService.signUp(signUpInput);
+    const modEmail = signUpInput.email.toLowerCase();
+    const newSignupInput : SignUpInput = {... signUpInput, email:modEmail};
+    const user = await this.authService.signUp(newSignupInput);
     const loginToken = await this.tokenService.generateLoginToken(user.email);
 
     return { loginToken };
